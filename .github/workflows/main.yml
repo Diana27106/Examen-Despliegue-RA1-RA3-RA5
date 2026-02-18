@@ -10,6 +10,16 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v4
 
+      - name: 0. Borrar la app anterior
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            echo "Si existe app borrarlo"
+            if [ ! -d /home/ubuntu/app ]; then rm -rf /home/ubuntu/app; fi
+
       - name: 1. Copiar archivos a la EC2 (SCP)
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -50,6 +60,7 @@ jobs:
 
             # Copiamos el código nuevo. '|| true' evita errores si la carpeta está vacía al principio
             # OJO: Asumo que dentro de tu repo hay una carpeta llamada 'app'. Si tu código está en la raíz, cambia esto.
+
             if [ -d "~/app/app" ]; then
                 sudo cp -r ~/app/app/* /efs/app/
             else
